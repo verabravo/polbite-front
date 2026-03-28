@@ -1,38 +1,73 @@
-import { View, ScrollView } from 'react-native';
+import { useEffect, useCallback } from 'react';
+import { View, ScrollView, RefreshControl } from 'react-native';
+import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Clock } from 'lucide-react-native';
 import { Typography } from '../../../ui/components/common/Typography';
+import { EmptyState } from '../../../ui/components/common/EmptyState';
+import { Skeleton } from '../../../ui/components/common/Skeleton';
+import { ErrorState } from '../../../ui/components/common/ErrorState';
+import { DietHistoryItem } from '../../../ui/components/diet/DietHistoryItem';
+import { useMealPlanHistoryStore } from '../../../application/stores/useMealPlanHistoryStore';
 import { colors } from '../../../ui/theme/colors';
 
+function formatDateRange(startedAt: string, endedAt: string | null): string {
+  const start = new Date(startedAt);
+  const fmt = (d: Date) =>
+    d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+  if (!endedAt) return `Desde ${fmt(start)}`;
+  const end = new Date(endedAt);
+  return `${fmt(start)} — ${fmt(end)}`;
+}
+
 export default function HistoryScreen() {
+  const { histories, isLoading, error, fetchHistories, clearError } = useMealPlanHistoryStore();
+
+  const loadData = useCallback(() => { fetchHistories(20); }, []);
+  useEffect(() => { loadData(); }, []);
+
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-      <ScrollView className="flex-1" contentContainerClassName="flex-grow px-6 py-8">
+      <ScrollView
+        className="flex-1"
+        contentContainerClassName="flex-grow px-4 pb-8"
+        refreshControl={<RefreshControl refreshing={isLoading} onRefresh={loadData} tintColor={colors.primary} />}
+      >
         <Typography
-          className="text-foreground text-2xl font-serif mb-8"
+          className="text-foreground text-2xl font-serif mb-6 pt-4"
           style={{ fontFamily: 'DMSerifDisplay-Regular' }}
         >
-          Historial semanal
+          Historial de dietas
         </Typography>
 
-        {/* Empty state */}
-        <View className="flex-1 items-center justify-center py-20">
-          <View
-            className="w-24 h-24 rounded-full items-center justify-center mb-6"
-            style={{ backgroundColor: `${colors.primary}1A` }}
-          >
-            <Clock size={40} color={`${colors.primary}66`} strokeWidth={1.5} />
+        {isLoading && histories.length === 0 ? (
+          <View className="gap-3">
+            <Skeleton className="h-20" />
+            <Skeleton className="h-20" />
+            <Skeleton className="h-20" />
           </View>
-          <Typography
-            className="text-foreground text-2xl font-serif mb-3 text-center"
-            style={{ fontFamily: 'DMSerifDisplay-Regular' }}
-          >
-            Sin revisiones aún
-          </Typography>
-          <Typography className="text-muted-foreground font-sans text-center max-w-xs">
-            Las revisiones semanales aparecerán aquí para que puedas ver tu evolución
-          </Typography>
-        </View>
+        ) : error ? (
+          <ErrorState message={error} onRetry={() => { clearError(); loadData(); }} />
+        ) : histories.length === 0 ? (
+          <EmptyState
+            icon={<Clock size={40} color={`${colors.primary}66`} strokeWidth={1.5} />}
+            title="Sin historial aún"
+            message="Cuando generes y modifiques tu dieta, el historial aparecerá aquí."
+          />
+        ) : (
+          <View className="gap-3">
+            {histories.map((entry) => (
+              <DietHistoryItem
+                key={entry.id}
+                name={`Plan ${entry.meal_plan_id.slice(0, 8)}…`}
+                dateRange={formatDateRange(entry.started_at, entry.ended_at)}
+                avgCalories={0}
+                isActive={entry.ended_at === null}
+                onPress={() => router.push(`/(main)/diet/${entry.id}`)}
+              />
+            ))}
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );

@@ -12,7 +12,7 @@ import { loginSchema, type LoginFormValues } from '../../shared/validators';
 import { colors } from '../../ui/theme/colors';
 
 export default function LoginScreen() {
-  const { login, isLoading } = useAuthStore();
+  const { login, isLoading, error, clearError } = useAuthStore();
 
   const { control, handleSubmit, formState: { errors } } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -20,6 +20,7 @@ export default function LoginScreen() {
   });
 
   const onSubmit = async (values: LoginFormValues) => {
+    clearError();
     try {
       await login(values.email, values.password);
       router.replace('/(main)/(tabs)/diet');
@@ -101,6 +102,14 @@ export default function LoginScreen() {
             >
               Iniciar sesión
             </Button>
+
+            {error && (
+              <View className="bg-destructive/10 rounded-2xl px-4 py-3 mt-2">
+                <Typography className="text-destructive font-sans text-sm text-center">
+                  {error}
+                </Typography>
+              </View>
+            )}
           </View>
 
           <View className="items-center mt-10">

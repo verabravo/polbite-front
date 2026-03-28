@@ -1,0 +1,25 @@
+services:
+  # ── Desarrollo local (perfil por defecto) ────────────────────────────────────
+  app:
+    build:
+      context: .
+      target: dev
+    ports:
+      - "8081:8081"
+    env_file:
+      - .env.local
+    volumes:
+      - .:/app
+      - /app/node_modules
+    profiles: ["", "dev"]
+
+  # ── Producción ───────────────────────────────────────────────────────────────
+  app-prod:
+    build:
+      context: .
+      target: prod
+    ports:
+      - "80:80"
+    env_file:
+      - .env.prod
+    profiles: ["prod"]

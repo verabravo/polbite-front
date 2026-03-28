@@ -4,25 +4,31 @@ import { AuthRepositoryImpl } from '../../infrastructure/repositories/AuthReposi
 import { LoginUseCase } from '../useCases/auth/LoginUseCase';
 import { RegisterUseCase } from '../useCases/auth/RegisterUseCase';
 import { LogoutUseCase } from '../useCases/auth/LogoutUseCase';
+import { CheckAuthUseCase } from '../useCases/auth/CheckAuthUseCase';
 
 const repo = new AuthRepositoryImpl();
 const loginUseCase = new LoginUseCase(repo);
 const registerUseCase = new RegisterUseCase(repo);
 const logoutUseCase = new LogoutUseCase(repo);
+const checkAuthUseCase = new CheckAuthUseCase(repo);
 
 interface AuthState {
   user: User | null;
+  userId: string | null;
   isLoading: boolean;
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  checkAuth: () => Promise<boolean>;
+  getUserId: () => Promise<string | null>;
   setUser: (user: User | null) => void;
   clearError: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
+  userId: null,
   isLoading: false,
   error: null,
 
@@ -55,8 +61,18 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       await logoutUseCase.execute();
     } finally {
-      set({ user: null, isLoading: false, error: null });
+      set({ user: null, userId: null, isLoading: false, error: null });
     }
+  },
+
+  checkAuth: async () => {
+    return checkAuthUseCase.hasValidSession();
+  },
+
+  getUserId: async () => {
+    const id = await checkAuthUseCase.getStoredUserId();
+    if (id) set({ userId: id });
+    return id;
   },
 
   setUser: (user) => set({ user }),

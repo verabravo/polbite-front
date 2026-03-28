@@ -7,23 +7,22 @@ import { Typography } from '../../ui/components/common/Typography';
 import { Button } from '../../ui/components/common/Button';
 import { StepIndicator } from '../../ui/components/common/StepIndicator';
 import { useProfileStore } from '../../application/stores/useProfileStore';
-import { type Goal } from '../../domain/models/Profile';
+import { type NutritionalGoal } from '../../domain/models/NutritionalProfile';
 import { colors } from '../../ui/theme/colors';
 
-const goals: { id: Goal; label: string; Icon: typeof ArrowDown }[] = [
-  { id: 'perder', label: 'Perder peso', Icon: ArrowDown },
-  { id: 'ganar', label: 'Ganar peso', Icon: ArrowUp },
-  { id: 'mantener', label: 'Mantener peso', Icon: Scale },
-  { id: 'musculo', label: 'Ganar músculo', Icon: Dumbbell },
+const goals: { id: NutritionalGoal; label: string; Icon: typeof ArrowDown }[] = [
+  { id: 'LoseWeight', label: 'Perder peso', Icon: ArrowDown },
+  { id: 'Maintain', label: 'Mantener peso', Icon: Scale },
+  { id: 'GainMuscle', label: 'Ganar músculo', Icon: Dumbbell },
 ];
 
 export default function StepGoalScreen() {
   const { setOnboardingField } = useProfileStore();
-  const [selected, setSelected] = useState<Goal | null>(null);
+  const [selected, setSelected] = useState<NutritionalGoal | null>(null);
 
   const onNext = () => {
     if (!selected) return;
-    setOnboardingField('goal', selected);
+    setOnboardingField('nutritional_goal', selected);
     router.push('/(onboarding)/step-body');
   };
 
@@ -49,11 +48,7 @@ export default function StepGoalScreen() {
             <Pressable
               key={id}
               onPress={() => setSelected(id)}
-              className={`flex-1 min-w-[45%] p-6 rounded-2xl border-2 items-center justify-center gap-3 min-h-[140px] ${
-                selected === id
-                  ? 'border-primary bg-primary/5'
-                  : 'border-muted bg-card'
-              }`}
+              className={`flex-1 min-w-[45%] p-6 rounded-2xl border-2 items-center justify-center gap-3 min-h-[140px]`}
               style={selected === id ? { borderColor: colors.primary, backgroundColor: `${colors.primary}0D` } : { borderColor: colors.muted, backgroundColor: colors.card }}
             >
               <Icon

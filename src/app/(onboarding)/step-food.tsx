@@ -6,18 +6,20 @@ import { Typography } from '../../ui/components/common/Typography';
 import { Button } from '../../ui/components/common/Button';
 import { StepIndicator } from '../../ui/components/common/StepIndicator';
 import { useProfileStore } from '../../application/stores/useProfileStore';
+import { type DietaryRestriction } from '../../domain/models/NutritionalProfile';
+import { RESTRICTION_LABELS } from '../../shared/constants';
 import { colors } from '../../ui/theme/colors';
 
-const restrictions = [
-  'Vegetariano', 'Vegano', 'Sin gluten', 'Sin lactosa',
-  'Sin frutos secos', 'Sin mariscos', 'Halal', 'Kosher',
+const allRestrictions: DietaryRestriction[] = [
+  'GlutenFree', 'LactoseFree', 'Vegetarian', 'Vegan',
+  'NutAllergy', 'ShellfishAllergy', 'EggFree', 'SoyFree', 'PorkFree',
 ];
 
 export default function StepFoodScreen() {
   const { setOnboardingField } = useProfileStore();
-  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [selected, setSelected] = useState<Set<DietaryRestriction>>(new Set());
 
-  const toggle = (item: string) => {
+  const toggle = (item: DietaryRestriction) => {
     setSelected((prev) => {
       const next = new Set(prev);
       next.has(item) ? next.delete(item) : next.add(item);
@@ -26,11 +28,7 @@ export default function StepFoodScreen() {
   };
 
   const onNext = () => {
-    setOnboardingField('foodPreferences', {
-      restrictions: Array.from(selected),
-      allergies: [],
-      dislikes: [],
-    });
+    setOnboardingField('dietary_restrictions', Array.from(selected));
     router.push('/(onboarding)/step-summary');
   };
 
@@ -52,7 +50,7 @@ export default function StepFoodScreen() {
         </View>
 
         <View className="flex-row flex-wrap gap-2 mb-8">
-          {restrictions.map((item) => {
+          {allRestrictions.map((item) => {
             const isActive = selected.has(item);
             return (
               <Pressable
@@ -65,7 +63,7 @@ export default function StepFoodScreen() {
                 }
               >
                 <Typography className={`font-sans-medium text-sm ${isActive ? 'text-white' : 'text-foreground'}`}>
-                  {item}
+                  {RESTRICTION_LABELS[item]}
                 </Typography>
               </Pressable>
             );

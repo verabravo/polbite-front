@@ -1,12 +1,13 @@
+export type AIRecommendation = 'KEEP_PLAN' | 'ADJUST_PLAN' | 'NEW_PLAN';
+
 export interface WeeklyReview {
   id: string;
-  userId: string;
-  dietId: string;
-  weekStartDate: string;
-  adherencePercent: number;
-  weightKg?: number;
-  energyLevel: 1 | 2 | 3 | 4 | 5;
-  hungerLevel: 1 | 2 | 3 | 4 | 5;
-  notes?: string;
-  createdAt: string;
+  user_id: string;
+  weight_kg: number;
+  height_cm: number | null;
+  week_comment: string | null;
+  diet_feedback: string | null;
+  ai_analysis: string;
+  ai_recommendation: AIRecommendation;
+  created_at: string;
 }

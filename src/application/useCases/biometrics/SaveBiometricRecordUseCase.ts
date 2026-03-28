@@ -1,13 +1,12 @@
-import {
-  type BiometricRepository,
-  type SaveBiometricPayload,
-} from '../../../domain/ports/BiometricRepository';
-import { type BiometricRecord } from '../../../domain/models/BiometricRecord';
+import { type BiometricRepository, type CreateBiometricEntryPayload } from '../../../domain/ports/BiometricRepository';
+import { type BiometricEntry } from '../../../domain/models/BiometricRecord';
 
 export class SaveBiometricRecordUseCase {
-  constructor(private readonly biometricRepo: BiometricRepository) {}
+  constructor(private readonly repo: BiometricRepository) {}
 
-  async execute(userId: string, payload: SaveBiometricPayload): Promise<BiometricRecord> {
-    return this.biometricRepo.saveRecord(userId, payload);
+  async execute(payload: Omit<CreateBiometricEntryPayload, 'biometric_entry_id'>): Promise<BiometricEntry> {
+    const biometric_entry_id = crypto.randomUUID();
+    await this.repo.create({ biometric_entry_id, ...payload });
+    return this.repo.getById(biometric_entry_id);
   }
 }

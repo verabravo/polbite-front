@@ -10,23 +10,24 @@ import { StepIndicator } from '../../ui/components/common/StepIndicator';
 import { useProfileStore } from '../../application/stores/useProfileStore';
 import { bodyDataSchema, type BodyDataFormValues } from '../../shared/validators';
 import { colors } from '../../ui/theme/colors';
-import { type Sex } from '../../domain/models/Profile';
+import { type BiologicalSex } from '../../domain/models/NutritionalProfile';
+import { SEX_LABELS } from '../../shared/constants';
 
 export default function StepBodyScreen() {
   const { setOnboardingField } = useProfileStore();
 
   const { control, handleSubmit, setValue, watch, formState: { errors } } = useForm<BodyDataFormValues>({
     resolver: zodResolver(bodyDataSchema),
-    defaultValues: { sex: 'masculino', birthDate: '', heightCm: undefined as unknown as number, weightKg: undefined as unknown as number },
+    defaultValues: { sex: 'Male', birthDate: '', heightCm: undefined as unknown as number, weightKg: undefined as unknown as number },
   });
 
   const sex = watch('sex');
 
   const onNext = (values: BodyDataFormValues) => {
-    setOnboardingField('sex', values.sex);
-    setOnboardingField('birthDate', values.birthDate);
-    setOnboardingField('heightCm', values.heightCm);
-    setOnboardingField('weightKg', values.weightKg);
+    setOnboardingField('biological_sex', values.sex as BiologicalSex);
+    setOnboardingField('date_of_birth', values.birthDate);
+    setOnboardingField('height_cm', values.heightCm);
+    setOnboardingField('weight_kg', values.weightKg);
     router.push('/(onboarding)/step-activity');
   };
 
@@ -59,15 +60,15 @@ export default function StepBodyScreen() {
             <View>
               <Typography className="text-foreground font-sans-medium mb-2">Sexo</Typography>
               <View className="flex-row gap-3">
-                {(['masculino', 'femenino'] as Sex[]).map((s) => (
+                {(['Male', 'Female'] as BiologicalSex[]).map((s) => (
                   <Pressable
                     key={s}
                     onPress={() => setValue('sex', s)}
                     className="flex-1 py-4 rounded-2xl border-2 items-center"
                     style={sex === s ? { borderColor: colors.primary, backgroundColor: `${colors.primary}0D` } : { borderColor: colors.muted, backgroundColor: colors.card }}
                   >
-                    <Typography className={`font-sans-medium capitalize ${sex === s ? 'text-primary' : 'text-foreground'}`}>
-                      {s}
+                    <Typography className={`font-sans-medium ${sex === s ? 'text-primary' : 'text-foreground'}`}>
+                      {SEX_LABELS[s]}
                     </Typography>
                   </Pressable>
                 ))}
@@ -81,7 +82,7 @@ export default function StepBodyScreen() {
                 <View>
                   <Typography className="text-foreground font-sans-medium mb-2">Fecha de nacimiento</Typography>
                   <Input
-                    placeholder="DD/MM/AAAA"
+                    placeholder="AAAA-MM-DD"
                     keyboardType="numeric"
                     onChangeText={onChange}
                     onBlur={onBlur}

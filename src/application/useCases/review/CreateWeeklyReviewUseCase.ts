@@ -1,13 +1,18 @@
-import {
-  type ReviewRepository,
-  type CreateReviewPayload,
-} from '../../../domain/ports/ReviewRepository';
+import { type WeeklyReviewRepository } from '../../../domain/ports/ReviewRepository';
 import { type WeeklyReview } from '../../../domain/models/WeeklyReview';
 
-export class CreateWeeklyReviewUseCase {
-  constructor(private readonly reviewRepo: ReviewRepository) {}
+interface CreateReviewInput {
+  weight_kg: number;
+  week_comment?: string;
+  diet_feedback?: string;
+}
 
-  async execute(userId: string, payload: CreateReviewPayload): Promise<WeeklyReview> {
-    return this.reviewRepo.createReview(userId, payload);
+export class CreateWeeklyReviewUseCase {
+  constructor(private readonly repo: WeeklyReviewRepository) {}
+
+  async execute(input: CreateReviewInput): Promise<WeeklyReview> {
+    const weekly_review_id = crypto.randomUUID();
+    await this.repo.create({ weekly_review_id, ...input });
+    return this.repo.getById(weekly_review_id);
   }
 }

@@ -1,0 +1,11 @@
+# Overrides para desarrollo local — hot reload con volúmenes
+services:
+  app:
+    environment:
+      - EXPO_PUBLIC_DEBUG_NETWORK=true
+    volumes:
+      - ./src:/app/src
+      - ./assets:/app/assets
+      - ./app.json:/app/app.json
+      - ./tailwind.config.js:/app/tailwind.config.js
+      - ./babel.config.js:/app/babel.config.js

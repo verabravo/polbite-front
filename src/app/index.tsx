@@ -4,11 +4,12 @@ import { router } from 'expo-router';
 import { Leaf } from 'lucide-react-native';
 import { Typography } from '../ui/components/common/Typography';
 import { colors } from '../ui/theme/colors';
-import { getStoredTokens } from '../infrastructure/storage/secureStorage';
+import { useAuthStore } from '../application/stores/useAuthStore';
 
 export default function SplashScreen() {
   const opacity = useRef(new Animated.Value(0)).current;
   const scale = useRef(new Animated.Value(0.9)).current;
+  const { checkAuth } = useAuthStore();
 
   useEffect(() => {
     Animated.parallel([
@@ -17,8 +18,8 @@ export default function SplashScreen() {
     ]).start();
 
     const timer = setTimeout(async () => {
-      const tokens = await getStoredTokens();
-      if (tokens) {
+      const hasSession = await checkAuth();
+      if (hasSession) {
         router.replace('/(main)/(tabs)/diet');
       } else {
         router.replace('/(auth)/login');

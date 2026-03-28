@@ -16,9 +16,11 @@ ios/
 .DS_Store
 *.pem
 
-# local env files
+# local env files (solo se commitean los .env.example)
 .env
 .env.local
+.env.dev
+.env.prod
 .env.development.local
 .env.test.local
 .env.production.local
@@ -31,3 +33,5 @@ ios/
 
 expo-env.d.ts
 # @end expo-cli
+
+.playwright-mcp/

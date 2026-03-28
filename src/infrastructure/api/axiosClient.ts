@@ -1,16 +1,12 @@
 import axios, { type AxiosInstance, type InternalAxiosRequestConfig, type AxiosResponse } from 'axios';
-import Constants from 'expo-constants';
+import { env } from '../../shared/env';
 import { getStoredTokens, saveTokens, clearTokens } from '../storage/secureStorage';
 
-const BASE_URL = Constants.expoConfig?.extra?.apiBaseUrl
-  ?? process.env['EXPO_PUBLIC_API_BASE_URL']
-  ?? 'http://localhost:8000';
-
-const API_VERSION = process.env['EXPO_PUBLIC_API_VERSION'] ?? 'v1';
-const TIMEOUT = Number(process.env['EXPO_PUBLIC_API_TIMEOUT'] ?? 10_000);
+const BASE_URL = env.apiBaseUrl;
+const TIMEOUT = env.apiTimeout;
 
 export const api: AxiosInstance = axios.create({
-  baseURL: `${BASE_URL}/api/${API_VERSION}`,
+  baseURL: BASE_URL,
   timeout: TIMEOUT,
   headers: {
     'Content-Type': 'application/json',
@@ -26,7 +22,7 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${tokens.accessToken}`;
     }
 
-    if (process.env['EXPO_PUBLIC_DEBUG_NETWORK'] === 'true') {
+    if (env.debugNetwork) {
       console.log(`[API] ${config.method?.toUpperCase()} ${config.url}`);
     }
 
@@ -35,7 +31,7 @@ api.interceptors.request.use(
   (error: unknown) => Promise.reject(error),
 );
 
-// ── Response interceptor: refresh token on 401 ────────────────────────────────
+// ── Response interceptor: refresh token on 401, handle 403 account_locked ────
 api.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (error: unknown) => {
@@ -43,6 +39,13 @@ api.interceptors.response.use(
 
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
     const status = error.response?.status;
+    const errorCode = (error.response?.data as { error_code?: string } | undefined)?.error_code;
+
+    if (status === 403 && errorCode === 'account_locked') {
+      const lockedError = new Error('Cuenta bloqueada temporalmente. Inténtalo en 30 minutos.');
+      (lockedError as Error & { code: string }).code = 'account_locked';
+      return Promise.reject(lockedError);
+    }
 
     if (status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
@@ -51,17 +54,17 @@ api.interceptors.response.use(
         const tokens = await getStoredTokens();
         if (!tokens?.refreshToken) throw new Error('No refresh token');
 
-        const { data } = await axios.post<{ accessToken: string; refreshToken: string }>(
-          `${BASE_URL}/api/${API_VERSION}/auth/refresh`,
-          { refreshToken: tokens.refreshToken },
+        const { data } = await axios.post<{ access: string; refresh: string }>(
+          `${BASE_URL}/api/auth/refresh/`,
+          { refresh: tokens.refreshToken },
         );
 
-        await saveTokens(data);
-        originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
+        const newTokens = { accessToken: data.access, refreshToken: data.refresh };
+        await saveTokens(newTokens);
+        originalRequest.headers.Authorization = `Bearer ${newTokens.accessToken}`;
         return api(originalRequest);
       } catch {
         await clearTokens();
-        // Let callers handle redirect
         return Promise.reject(error);
       }
     }

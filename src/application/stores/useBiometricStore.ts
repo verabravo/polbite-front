@@ -1,48 +1,53 @@
 import { create } from 'zustand';
-import { type BiometricRecord, type BiometricMetric } from '../../domain/models/BiometricRecord';
+import { type BiometricEntry, type BiometricMetric } from '../../domain/models/BiometricRecord';
 import { BiometricRepositoryImpl } from '../../infrastructure/repositories/BiometricRepositoryImpl';
+import { GetBiometricRecordsUseCase } from '../useCases/biometrics/GetBiometricRecordsUseCase';
 import { SaveBiometricRecordUseCase } from '../useCases/biometrics/SaveBiometricRecordUseCase';
+import { type CreateBiometricEntryPayload } from '../../domain/ports/BiometricRepository';
 
 const repo = new BiometricRepositoryImpl();
-const saveUseCase = new SaveBiometricRecordUseCase(repo);
+const listUseCase = new GetBiometricRecordsUseCase(repo);
+const createUseCase = new SaveBiometricRecordUseCase(repo);
 
 interface BiometricState {
-  records: BiometricRecord[];
+  entries: BiometricEntry[];
+  total: number;
   selectedMetric: BiometricMetric;
   isLoading: boolean;
   error: string | null;
-  fetchRecords: (userId: string, metric?: BiometricMetric) => Promise<void>;
-  saveRecord: (userId: string, metric: BiometricMetric, value: number) => Promise<void>;
+  fetchEntries: (limit?: number) => Promise<void>;
+  createEntry: (payload: Omit<CreateBiometricEntryPayload, 'biometric_entry_id'>) => Promise<void>;
   setSelectedMetric: (metric: BiometricMetric) => void;
   clearError: () => void;
 }
 
 export const useBiometricStore = create<BiometricState>((set) => ({
-  records: [],
-  selectedMetric: 'peso',
+  entries: [],
+  total: 0,
+  selectedMetric: 'weight_kg',
   isLoading: false,
   error: null,
 
-  fetchRecords: async (userId, metric) => {
+  fetchEntries: async (limit = 50) => {
     set({ isLoading: true, error: null });
     try {
-      const result = await repo.getRecords(userId, metric);
-      set({ records: result, isLoading: false });
+      const { results, total } = await listUseCase.execute(limit);
+      set({ entries: results, total, isLoading: false });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error al cargar registros';
       set({ error: message, isLoading: false });
     }
   },
 
-  saveRecord: async (userId, metric, value) => {
+  createEntry: async (payload) => {
     set({ isLoading: true, error: null });
     try {
-      const record = await saveUseCase.execute(userId, {
-        metric,
-        value,
-        recordedAt: new Date().toISOString(),
-      });
-      set((state) => ({ records: [record, ...state.records], isLoading: false }));
+      const entry = await createUseCase.execute(payload);
+      set((state) => ({
+        entries: [entry, ...state.entries],
+        total: state.total + 1,
+        isLoading: false,
+      }));
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error al guardar registro';
       set({ error: message, isLoading: false });

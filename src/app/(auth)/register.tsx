@@ -12,7 +12,7 @@ import { registerSchema, type RegisterFormValues } from '../../shared/validators
 import { colors } from '../../ui/theme/colors';
 
 export default function RegisterScreen() {
-  const { register, isLoading } = useAuthStore();
+  const { register, isLoading, error, clearError } = useAuthStore();
 
   const { control, handleSubmit, formState: { errors } } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -20,6 +20,7 @@ export default function RegisterScreen() {
   });
 
   const onSubmit = async (values: RegisterFormValues) => {
+    clearError();
     try {
       await register(values.name, values.email, values.password);
       router.replace('/(onboarding)/step-goal');
@@ -133,6 +134,14 @@ export default function RegisterScreen() {
             >
               Crear cuenta
             </Button>
+
+            {error && (
+              <View className="bg-destructive/10 rounded-2xl px-4 py-3 mt-2">
+                <Typography className="text-destructive font-sans text-sm text-center">
+                  {error}
+                </Typography>
+              </View>
+            )}
           </View>
 
           <View className="items-center mt-10 pb-4">

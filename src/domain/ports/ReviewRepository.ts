@@ -1,16 +1,14 @@
 import { type WeeklyReview } from '../models/WeeklyReview';
 
-export interface CreateReviewPayload {
-  dietId: string;
-  weekStartDate: string;
-  adherencePercent: number;
-  weightKg?: number;
-  energyLevel: 1 | 2 | 3 | 4 | 5;
-  hungerLevel: 1 | 2 | 3 | 4 | 5;
-  notes?: string;
+export interface CreateWeeklyReviewPayload {
+  weekly_review_id: string;
+  weight_kg: number;
+  week_comment?: string;
+  diet_feedback?: string;
 }
 
-export interface ReviewRepository {
-  getReviews(userId: string): Promise<WeeklyReview[]>;
-  createReview(userId: string, payload: CreateReviewPayload): Promise<WeeklyReview>;
+export interface WeeklyReviewRepository {
+  create(payload: CreateWeeklyReviewPayload): Promise<void>;
+  getById(id: string): Promise<WeeklyReview>;
+  search(limit?: number, offset?: number): Promise<{ results: WeeklyReview[]; total: number }>;
 }

@@ -17,9 +17,10 @@ export interface AuthTokens {
 }
 
 export interface AuthRepository {
-  login(credentials: LoginCredentials): Promise<{ user: User; tokens: AuthTokens }>;
-  register(credentials: RegisterCredentials): Promise<{ user: User; tokens: AuthTokens }>;
+  login(credentials: LoginCredentials): Promise<{ user: User; tokens: AuthTokens; userId: string }>;
+  register(credentials: RegisterCredentials): Promise<{ user: User; tokens: AuthTokens; userId: string }>;
   logout(): Promise<void>;
   refreshToken(refreshToken: string): Promise<AuthTokens>;
   getStoredTokens(): Promise<AuthTokens | null>;
+  getStoredUserId(): Promise<string | null>;
 }

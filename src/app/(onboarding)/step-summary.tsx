@@ -7,27 +7,45 @@ import { Button } from '../../ui/components/common/Button';
 import { Card } from '../../ui/components/common/Card';
 import { StepIndicator } from '../../ui/components/common/StepIndicator';
 import { useProfileStore } from '../../application/stores/useProfileStore';
-import { GOAL_LABELS, ACTIVITY_LABELS } from '../../shared/constants';
+import { useDietStore } from '../../application/stores/useDietStore';
+import { GOAL_LABELS, ACTIVITY_LABELS, SEX_LABELS, RESTRICTION_LABELS } from '../../shared/constants';
 import { colors } from '../../ui/theme/colors';
 
 export default function StepSummaryScreen() {
-  const { onboardingData } = useProfileStore();
+  const { onboardingData, saveProfile, isLoading } = useProfileStore();
+  const { createMealPlan, fetchMealPlan } = useDietStore();
 
-  const onGenerate = () => {
-    // TODO: llamar al use case SaveOnboarding y luego GenerateDiet
+  const onGenerate = async () => {
+    await saveProfile({
+      date_of_birth: onboardingData.date_of_birth ?? '',
+      biological_sex: onboardingData.biological_sex ?? 'Male',
+      height_cm: onboardingData.height_cm ?? 0,
+      weight_kg: onboardingData.weight_kg ?? 0,
+      activity_level: onboardingData.activity_level ?? 'Sedentary',
+      nutritional_goal: onboardingData.nutritional_goal ?? 'Maintain',
+      dietary_restrictions: (onboardingData.dietary_restrictions ?? []).map((r) => ({ value: r })),
+      custom_dietary_notes: '',
+    });
+
+    await createMealPlan({
+      meal_plan_id: crypto.randomUUID(),
+      meals: [],
+    });
+
+    await fetchMealPlan();
     router.replace('/(main)/(tabs)/diet');
   };
 
   const rows: { label: string; value: string }[] = [
-    { label: 'Objetivo', value: onboardingData.goal ? (GOAL_LABELS[onboardingData.goal] ?? '—') : '—' },
-    { label: 'Sexo', value: onboardingData.sex ? (onboardingData.sex === 'masculino' ? 'Masculino' : 'Femenino') : '—' },
-    { label: 'Altura', value: onboardingData.heightCm ? `${onboardingData.heightCm} cm` : '—' },
-    { label: 'Peso', value: onboardingData.weightKg ? `${onboardingData.weightKg} kg` : '—' },
-    { label: 'Actividad', value: onboardingData.activityLevel ? (ACTIVITY_LABELS[onboardingData.activityLevel] ?? '—') : '—' },
+    { label: 'Objetivo', value: onboardingData.nutritional_goal ? (GOAL_LABELS[onboardingData.nutritional_goal] ?? '—') : '—' },
+    { label: 'Sexo', value: onboardingData.biological_sex ? (SEX_LABELS[onboardingData.biological_sex] ?? '—') : '—' },
+    { label: 'Altura', value: onboardingData.height_cm ? `${onboardingData.height_cm} cm` : '—' },
+    { label: 'Peso', value: onboardingData.weight_kg ? `${onboardingData.weight_kg} kg` : '—' },
+    { label: 'Actividad', value: onboardingData.activity_level ? (ACTIVITY_LABELS[onboardingData.activity_level] ?? '—') : '—' },
     {
       label: 'Restricciones',
-      value: onboardingData.foodPreferences?.restrictions.length
-        ? onboardingData.foodPreferences.restrictions.join(', ')
+      value: onboardingData.dietary_restrictions?.length
+        ? onboardingData.dietary_restrictions.map((r) => RESTRICTION_LABELS[r] ?? r).join(', ')
         : 'Ninguna',
     },
   ];
@@ -46,7 +64,7 @@ export default function StepSummaryScreen() {
             Resumen de tu perfil
           </Typography>
           <Typography className="text-muted-foreground font-sans text-center">
-            Revisa tus datos antes de generar la dieta
+            Revisa tus datos antes de continuar
           </Typography>
         </View>
 
@@ -63,8 +81,8 @@ export default function StepSummaryScreen() {
         </Card>
 
         <View className="pb-4">
-          <Button onPress={onGenerate}>
-            Generar mi dieta
+          <Button onPress={onGenerate} isLoading={isLoading}>
+            Guardar perfil
           </Button>
         </View>
       </ScrollView>
