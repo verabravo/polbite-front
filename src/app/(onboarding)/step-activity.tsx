@@ -66,10 +66,11 @@ export default function StepActivityScreen() {
           ))}
         </View>
 
-        <View className="mt-auto pb-4">
+        <View className="mt-auto pb-4 gap-3">
           <Button onPress={onNext} disabled={!selected}>
             Siguiente
           </Button>
+          <Button variant="ghost" onPress={() => router.back()}>Anterior</Button>
         </View>
       </ScrollView>
     </SafeAreaView>

@@ -1,7 +1,7 @@
 import { useEffect, useCallback } from 'react';
 import { View, ScrollView, Pressable, RefreshControl } from 'react-native';
 import { router } from 'expo-router';
-import { Filter, Utensils } from 'lucide-react-native';
+import { Filter, Utensils, ClipboardList } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Typography } from '../../../ui/components/common/Typography';
 import { Skeleton } from '../../../ui/components/common/Skeleton';
@@ -67,12 +67,22 @@ export default function DietScreen() {
         refreshControl={<RefreshControl refreshing={isLoading} onRefresh={loadData} tintColor={colors.primary} />}
       >
         <View className="mb-4">
-          <Typography
-            className="text-foreground text-2xl font-serif mb-4"
-            style={{ fontFamily: 'DMSerifDisplay-Regular' }}
-          >
-            Tu dieta
-          </Typography>
+          <View className="flex-row items-center justify-between mb-4">
+            <Typography
+              className="text-foreground text-2xl font-serif"
+              style={{ fontFamily: 'DMSerifDisplay-Regular' }}
+            >
+              Tu dieta
+            </Typography>
+            <Pressable
+              onPress={() => router.push('/(main)/review/new')}
+              className="flex-row items-center gap-1.5 px-3 py-1.5 rounded-full border"
+              style={{ borderColor: colors.primary, backgroundColor: `${colors.primary}0D` }}
+            >
+              <ClipboardList size={14} color={colors.primary} strokeWidth={1.5} />
+              <Typography className="text-primary font-sans-medium text-xs">Revisión semanal</Typography>
+            </Pressable>
+          </View>
 
           <MacrosSummary
             calories={dayPlan?.total_calories ?? 0}

@@ -70,10 +70,11 @@ export default function StepFoodScreen() {
           })}
         </View>
 
-        <View className="mt-auto pb-4">
+        <View className="mt-auto pb-4 gap-3">
           <Button onPress={onNext}>
             {selected.size === 0 ? 'Omitir' : 'Siguiente'}
           </Button>
+          <Button variant="ghost" onPress={() => router.back()}>Anterior</Button>
         </View>
       </ScrollView>
     </SafeAreaView>

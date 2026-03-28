@@ -1,5 +1,5 @@
 import { api } from '../api/axiosClient';
-import { saveTokens, clearTokens, getStoredTokens } from '../storage/secureStorage';
+import { saveTokens, clearTokens, getStoredTokens, saveUser, getStoredUser } from '../storage/secureStorage';
 import { saveUserId, getStoredUserId } from '../storage/secureStorage';
 import {
   type AuthRepository,
@@ -21,6 +21,7 @@ export class AuthRepositoryImpl implements AuthRepository {
     await saveUserId(data.user_id);
 
     const userRes = await api.get<User>(`/api/users/${data.user_id}/`);
+    await saveUser({ name: userRes.data.name, email: userRes.data.email });
     return { user: userRes.data, tokens, userId: data.user_id };
   }
 
@@ -67,5 +68,13 @@ export class AuthRepositoryImpl implements AuthRepository {
 
   async getStoredUserId(): Promise<string | null> {
     return getStoredUserId();
+  }
+
+  async saveUser(user: Pick<User, 'name' | 'email'>): Promise<void> {
+    return saveUser(user);
+  }
+
+  async getStoredUser(): Promise<Pick<User, 'name' | 'email'> | null> {
+    return getStoredUser();
   }
 }

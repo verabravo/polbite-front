@@ -4,6 +4,8 @@ import * as SecureStore from 'expo-secure-store';
 const TOKEN_KEY = process.env['EXPO_PUBLIC_SECURE_STORE_TOKEN_KEY'] ?? 'polbite_access_token';
 const REFRESH_KEY = process.env['EXPO_PUBLIC_SECURE_STORE_REFRESH_KEY'] ?? 'polbite_refresh_token';
 const USER_ID_KEY = 'polbite_user_id';
+const USER_NAME_KEY = 'polbite_user_name';
+const USER_EMAIL_KEY = 'polbite_user_email';
 
 export interface StoredTokens {
   accessToken: string;
@@ -48,7 +50,25 @@ export async function clearTokens(): Promise<void> {
     store.deleteItemAsync(TOKEN_KEY),
     store.deleteItemAsync(REFRESH_KEY),
     store.deleteItemAsync(USER_ID_KEY),
+    store.deleteItemAsync(USER_NAME_KEY),
+    store.deleteItemAsync(USER_EMAIL_KEY),
   ]);
+}
+
+export async function saveUser(user: { name: string; email: string }): Promise<void> {
+  await Promise.all([
+    store.setItemAsync(USER_NAME_KEY, user.name),
+    store.setItemAsync(USER_EMAIL_KEY, user.email),
+  ]);
+}
+
+export async function getStoredUser(): Promise<{ name: string; email: string } | null> {
+  const [name, email] = await Promise.all([
+    store.getItemAsync(USER_NAME_KEY),
+    store.getItemAsync(USER_EMAIL_KEY),
+  ]);
+  if (!name || !email) return null;
+  return { name, email };
 }
 
 export async function saveUserId(userId: string): Promise<void> {

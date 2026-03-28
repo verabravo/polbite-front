@@ -80,10 +80,11 @@ export default function StepSummaryScreen() {
           ))}
         </Card>
 
-        <View className="pb-4">
+        <View className="pb-4 gap-3">
           <Button onPress={onGenerate} isLoading={isLoading}>
             Guardar perfil
           </Button>
+          <Button variant="ghost" onPress={() => router.back()} disabled={isLoading}>Anterior</Button>
         </View>
       </ScrollView>
     </SafeAreaView>

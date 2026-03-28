@@ -66,7 +66,17 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   checkAuth: async () => {
-    return checkAuthUseCase.hasValidSession();
+    const valid = await checkAuthUseCase.hasValidSession();
+    if (valid) {
+      const [storedUser, userId] = await Promise.all([
+        checkAuthUseCase.getStoredUser(),
+        checkAuthUseCase.getStoredUserId(),
+      ]);
+      if (storedUser) {
+        set({ user: { id: '', username: '', created_at: '', ...storedUser }, userId });
+      }
+    }
+    return valid;
   },
 
   getUserId: async () => {

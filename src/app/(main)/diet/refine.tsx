@@ -192,6 +192,13 @@ export default function RefineDietScreen() {
           contentContainerClassName="px-4 pb-32"
           keyboardShouldPersistTaps="handled"
         >
+          {mealPlan.meals_by_day.every((d) => d.meals.length === 0) && (
+            <EmptyState
+              icon={<Sparkles size={40} color={`${colors.primary}66`} strokeWidth={1.5} />}
+              title="Sin comidas planificadas"
+              message="Tu plan de dieta está vacío. Contacta con tu nutricionista para añadir comidas."
+            />
+          )}
           {mealPlan.meals_by_day
             .filter((d) => d.meals.length > 0)
             .sort((a, b) => a.day_of_week - b.day_of_week)

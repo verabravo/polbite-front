@@ -23,4 +23,6 @@ export interface AuthRepository {
   refreshToken(refreshToken: string): Promise<AuthTokens>;
   getStoredTokens(): Promise<AuthTokens | null>;
   getStoredUserId(): Promise<string | null>;
+  saveUser(user: Pick<User, 'name' | 'email'>): Promise<void>;
+  getStoredUser(): Promise<Pick<User, 'name' | 'email'> | null>;
 }

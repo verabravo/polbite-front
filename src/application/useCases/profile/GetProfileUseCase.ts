@@ -4,7 +4,7 @@ import { type NutritionalProfile } from '../../../domain/models/NutritionalProfi
 export class GetProfileUseCase {
   constructor(private readonly repo: ProfileRepository) {}
 
-  async execute(userId: string): Promise<NutritionalProfile> {
+  async execute(userId: string): Promise<NutritionalProfile | null> {
     return this.repo.getProfile(userId);
   }
 }

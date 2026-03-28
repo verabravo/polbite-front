@@ -1,14 +1,17 @@
 import { useEffect, useCallback } from 'react';
-import { View, ScrollView, RefreshControl } from 'react-native';
+import { View, ScrollView, RefreshControl, Pressable } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Clock } from 'lucide-react-native';
+import { Clock, ChevronRight } from 'lucide-react-native';
 import { Typography } from '../../../ui/components/common/Typography';
 import { EmptyState } from '../../../ui/components/common/EmptyState';
 import { Skeleton } from '../../../ui/components/common/Skeleton';
 import { ErrorState } from '../../../ui/components/common/ErrorState';
+import { Card } from '../../../ui/components/common/Card';
 import { DietHistoryItem } from '../../../ui/components/diet/DietHistoryItem';
 import { useMealPlanHistoryStore } from '../../../application/stores/useMealPlanHistoryStore';
+import { useReviewStore } from '../../../application/stores/useReviewStore';
+import { AI_RECOMMENDATION_LABELS } from '../../../shared/constants';
 import { colors } from '../../../ui/theme/colors';
 
 function formatDateRange(startedAt: string, endedAt: string | null): string {
@@ -22,8 +25,12 @@ function formatDateRange(startedAt: string, endedAt: string | null): string {
 
 export default function HistoryScreen() {
   const { histories, isLoading, error, fetchHistories, clearError } = useMealPlanHistoryStore();
+  const { reviews, fetchReviews } = useReviewStore();
 
-  const loadData = useCallback(() => { fetchHistories(20); }, []);
+  const loadData = useCallback(() => {
+    fetchHistories(20);
+    fetchReviews(10);
+  }, []);
   useEffect(() => { loadData(); }, []);
 
   return (
@@ -66,6 +73,42 @@ export default function HistoryScreen() {
                 onPress={() => router.push(`/(main)/diet/${entry.id}`)}
               />
             ))}
+          </View>
+        )}
+
+        {reviews.length > 0 && (
+          <View className="mt-8">
+            <Typography
+              className="text-foreground text-lg font-serif mb-3"
+              style={{ fontFamily: 'DMSerifDisplay-Regular' }}
+            >
+              Revisiones semanales
+            </Typography>
+            <View className="gap-3">
+              {reviews.map((review) => {
+                const rec = AI_RECOMMENDATION_LABELS[review.ai_recommendation];
+                return (
+                  <Pressable
+                    key={review.id}
+                    onPress={() => router.push(`/(main)/review/${review.id}`)}
+                  >
+                    <Card className="p-4 flex-row items-center justify-between">
+                      <View>
+                        <Typography className="text-foreground font-sans-medium">
+                          {new Date(review.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        </Typography>
+                        {rec && (
+                          <Typography className="font-sans text-sm mt-0.5" style={{ color: rec.color }}>
+                            {rec.label}
+                          </Typography>
+                        )}
+                      </View>
+                      <ChevronRight size={18} color={colors.mutedForeground} strokeWidth={1.5} />
+                    </Card>
+                  </Pressable>
+                );
+              })}
+            </View>
           </View>
         )}
       </ScrollView>

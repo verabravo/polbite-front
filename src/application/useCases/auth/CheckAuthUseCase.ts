@@ -1,4 +1,5 @@
-import { type AuthRepository, type AuthTokens } from '../../../domain/ports/AuthRepository';
+import { type AuthRepository } from '../../../domain/ports/AuthRepository';
+import { type User } from '../../../domain/models/User';
 
 export class CheckAuthUseCase {
   constructor(private readonly repo: AuthRepository) {}
@@ -10,5 +11,9 @@ export class CheckAuthUseCase {
 
   async getStoredUserId(): Promise<string | null> {
     return this.repo.getStoredUserId();
+  }
+
+  async getStoredUser(): Promise<Pick<User, 'name' | 'email'> | null> {
+    return this.repo.getStoredUser();
   }
 }

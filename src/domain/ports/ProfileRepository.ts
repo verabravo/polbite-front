@@ -18,6 +18,6 @@ export interface SetNutritionalProfilePayload {
 }
 
 export interface ProfileRepository {
-  getProfile(userId: string): Promise<NutritionalProfile>;
+  getProfile(userId: string): Promise<NutritionalProfile | null>;
   setProfile(payload: SetNutritionalProfilePayload): Promise<void>;
 }

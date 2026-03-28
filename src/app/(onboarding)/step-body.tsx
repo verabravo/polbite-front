@@ -130,8 +130,9 @@ export default function StepBodyScreen() {
             />
           </View>
 
-          <View className="mt-8 pb-4">
+          <View className="mt-8 pb-4 gap-3">
             <Button onPress={handleSubmit(onNext)}>Siguiente</Button>
+            <Button variant="ghost" onPress={() => router.back()}>Anterior</Button>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
