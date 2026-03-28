@@ -21,7 +21,7 @@ interface MealPlanHistoryState {
 export const useMealPlanHistoryStore = create<MealPlanHistoryState>((set) => ({
   histories: [],
   total: 0,
-  isLoading: false,
+  isLoading: true,
   error: null,
 
   fetchHistories: async (limit = 20) => {

@@ -39,7 +39,7 @@ interface DietState {
 export const useDietStore = create<DietState>((set) => ({
   mealPlan: null,
   selectedDay: 1,
-  isLoading: false,
+  isLoading: true,
   error: null,
 
   fetchMealPlan: async () => {

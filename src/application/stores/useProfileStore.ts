@@ -24,7 +24,7 @@ interface ProfileState {
 export const useProfileStore = create<ProfileState>((set) => ({
   profile: null,
   onboardingData: {},
-  isLoading: false,
+  isLoading: true,
   error: null,
 
   fetchProfile: async (userId) => {

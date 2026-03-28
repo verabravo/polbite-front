@@ -25,7 +25,7 @@ export const useBiometricStore = create<BiometricState>((set) => ({
   entries: [],
   total: 0,
   selectedMetric: 'weight_kg',
-  isLoading: false,
+  isLoading: true,
   error: null,
 
   fetchEntries: async (limit = 50) => {
